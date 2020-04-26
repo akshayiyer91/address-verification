@@ -76,7 +76,7 @@ The service will return either return a success/error in json format.
 3) Leading and trailing spaces are trimmed while processing the request.
 4) The query parameters are hashed (one way) and geocodes are encrypted before getting stored in the database, assuming these are PII (Personally identifiable information).
 5) Accessing any other route in the application must return 404 with a message `Resource does not exist`.
-6) If any specific address returns multiple geocodes from the API, the first one is returned as part of the response.
+6) If any specific address returns multiple geocodes from the API, the first one to have a match with the zipcode is returned as part of the response.
 
 ## Limitations
 ----------
