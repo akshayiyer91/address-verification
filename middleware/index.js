@@ -12,7 +12,6 @@ exports.validateInput = function(req, res, next) {
 		error.statusCode = 400;
 		return next(error);
 	}
-	console.log(req.query);
 	return next();
 };
 
