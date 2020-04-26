@@ -40,25 +40,30 @@ exports.getGeocodes = async function(req, res, next) {
 				state,
 				postalcode,
 				format         : 'json',
-				limit          : 1,
+				limit          : 10,
 				addressdetails : 1
 			}
 		});
-		if (response.status === 200) {
-			const [ result ] = response.data;
 
-			const addressDetails = result.address;
-			if (
-				(addressDetails.city && addressDetails.city.trim().toLowerCase() !== city.trim().toLowerCase()) ||
-				(addressDetails.postcode &&
-					addressDetails.postcode.trim().toLowerCase() !== postalcode.trim().toLowerCase())
-			) {
+		if (response.status === 200) {
+			const result = response.data;
+			let latitude, longitude;
+			for (let data of result) {
+				if (
+					data.address.postcode &&
+					data.address.postcode.trim().toLowerCase() === postalcode.trim().toLowerCase()
+				) {
+					latitude = data.lat;
+					longitude = data.lon;
+					break;
+				}
+			}
+			if (!latitude) {
 				const error = new Error('Unable to geocode');
-				error.status = 404;
+				error.statusCode = 404;
 				return next(error);
 			}
 
-			const { lat: latitude, lon: longitude } = result;
 			console.log('from api');
 			res.status(200).json({
 				...req.query,
@@ -77,8 +82,10 @@ exports.getGeocodes = async function(req, res, next) {
 			next(error);
 		}
 	} catch (err) {
-		err.statusCode = err.response.status;
-		err.message = err.response.data.error;
-		next(err);
+		if (err.reponse) {
+			err.statusCode = err.response.status;
+			err.message = err.response.data.error;
+			return next(err);
+		}
 	}
 };
