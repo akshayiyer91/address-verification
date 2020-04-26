@@ -82,10 +82,10 @@ exports.getGeocodes = async function(req, res, next) {
 			next(error);
 		}
 	} catch (err) {
-		if (err.reponse) {
+		if (err.response) {
 			err.statusCode = err.response.status;
 			err.message = err.response.data.error;
-			return next(err);
 		}
+		next(err);
 	}
 };
