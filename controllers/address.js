@@ -33,10 +33,31 @@ exports.getGeocodes = async function(req, res, next) {
 
 	try {
 		const response = await axios.get(geocodeURL, {
-			params : { key: geocodeApiKey, street, city, state, postalcode, format: 'json' }
+			params : {
+				key            : geocodeApiKey,
+				street,
+				city,
+				state,
+				postalcode,
+				format         : 'json',
+				limit          : 1,
+				addressdetails : 1
+			}
 		});
 		if (response.status === 200) {
 			const [ result ] = response.data;
+
+			const addressDetails = result.address;
+			if (
+				(addressDetails.city && addressDetails.city.trim().toLowerCase() !== city.trim().toLowerCase()) ||
+				(addressDetails.postcode &&
+					addressDetails.postcode.trim().toLowerCase() !== postalcode.trim().toLowerCase())
+			) {
+				const error = new Error('Unable to geocode');
+				error.status = 404;
+				return next(error);
+			}
+
 			const { lat: latitude, lon: longitude } = result;
 			console.log('from api');
 			res.status(200).json({
